@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from typing import Any, List, Dict
+from typing import Any, List, Dict, Optional
 
 import requests
 import pymysql
@@ -25,7 +25,7 @@ class AbsolutTradeAPI:
     def __init__(self) -> None:
         self.host: str = "https://api.absoluttrade.ru/api"
         self.db_name: str = os.getenv("DB_NAME")
-        self.token: str | None = None
+        self.token: Optional[str] = None
         self.headers: Dict[str, str] = {}
         self.retry_total = 5
         self.session = self._create_session()
@@ -45,12 +45,13 @@ class AbsolutTradeAPI:
 
         return session
 
-    def get_db_connection(self, database: str | None = None):
+    @staticmethod
+    def get_db_connection(database: Optional[str] = None):
         return pymysql.connect(
             host=os.getenv("DB_HOST"),
             user=os.getenv("DB_USER"),
             password=os.getenv("DB_PASS"),
-            database=database if database is not None else self.db_name,
+            database=database,
             charset="utf8mb4",
             cursorclass=DictCursor,
             connect_timeout=10,
@@ -85,7 +86,7 @@ class AbsolutTradeAPI:
     def init_db(self) -> None:
         logger.info("Initiate database...")
 
-        connect = self.get_db_connection()
+        connect = self.get_db_connection(None)
 
         try:
             with connect.cursor() as cursor:
