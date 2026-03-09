@@ -1,0 +1,15 @@
+# IDE
+.idea/
+*.iml
+
+# Environments
+.venv/
+venv/
+ENV/
+
+# Sensitive data
+.env
+
+# Project specific
+logs/
+backups/
