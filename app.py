@@ -265,6 +265,9 @@ class AbsolutTradeAPI:
             inventory_rows = []
 
             for item in items:
+                if not item.get("productId"):
+                    continue
+
                 products_rows.append(
                     (
                         item.get("productId"),
@@ -319,7 +322,7 @@ class AbsolutTradeAPI:
                     cursor.execute("CREATE TEMPORARY TABLE temp_inventory LIKE products_inventory")
 
                     cursor.executemany("""
-                        INSERT INTO temp_products (
+                        INSERT IGNORE INTO temp_products (
                             productId, traceability, productName, manufacturerCode, vendorCode,
                             categoryCode, catalogTree, paymentTerms, paymentTermName,
                             lastUpdateDate, crossReference, warranty, isEol, isKitItem,
@@ -362,13 +365,15 @@ class AbsolutTradeAPI:
         items: List[Dict[str, Any]] = response.json()
 
         if items:
-            rows = [
-                (
+            rows = []
+            for item in items:
+                if not item.get("productId"):
+                    continue
+
+                rows.append((
                     item.get("productId"),
                     json.dumps(item.get("description"), ensure_ascii=False),
-                )
-                for item in items
-            ]
+                ))
 
             logger.info("Save descriptions...")
 
@@ -379,7 +384,7 @@ class AbsolutTradeAPI:
                     cursor.execute("CREATE TEMPORARY TABLE temp_products_description LIKE products_description")
 
                     cursor.executemany("""
-                        INSERT INTO temp_products_description (productId, description)
+                        INSERT IGNORE INTO temp_products_description (productId, description)
                         VALUES (%s, %s)
                         """,
                         rows
@@ -407,13 +412,15 @@ class AbsolutTradeAPI:
         items: List[Dict[str, Any]] = response.json()
 
         if items:
-            rows = [
-                (
+            rows = []
+            for item in items:
+                if not item.get("productId"):
+                    continue
+
+                rows.append((
                     item.get("productId"),
                     json.dumps(item.get("mediaLinks", []), ensure_ascii=False),
-                )
-                for item in items
-            ]
+                ))
 
             logger.info("Save media items...")
 
@@ -424,7 +431,7 @@ class AbsolutTradeAPI:
                     cursor.execute("CREATE TEMPORARY TABLE temp_products_media_items LIKE products_media_items")
 
                     cursor.executemany("""
-                        INSERT INTO temp_products_media_items (productId, mediaLinks)
+                        INSERT IGNORE INTO temp_products_media_items (productId, mediaLinks)
                         VALUES (%s, %s)
                         """,
                         rows
