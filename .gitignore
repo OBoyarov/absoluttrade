@@ -13,3 +13,7 @@ ENV/
 # Project specific
 logs/
 backups/
+
+# Python
+__pycache__/
+*.pyc

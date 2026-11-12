@@ -28,6 +28,7 @@ class AbsolutTradeAPI:
         self.token: Optional[str] = None
         self.headers: Dict[str, str] = {}
         self.retry_total = 5
+        self.timeout = int(os.getenv("REQUEST_TIMEOUT", "300"))
         self.session = self._create_session()
 
     def _create_session(self) -> requests.Session:
@@ -76,7 +77,7 @@ class AbsolutTradeAPI:
                 "username": os.getenv("API_USERNAME"),
                 "password": os.getenv("API_PASSWORD"),
             },
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -176,7 +177,7 @@ class AbsolutTradeAPI:
         response = self.session.get(
             f"{self.host}/Catalogs/Categories",
             headers=self.headers,
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -215,7 +216,7 @@ class AbsolutTradeAPI:
         response = self.session.get(
             f"{self.host}/Catalogs/Vendors",
             headers=self.headers,
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -254,7 +255,7 @@ class AbsolutTradeAPI:
         response = self.session.get(
             f"{self.host}/Catalogs/ProductSearch",
             headers=self.headers,
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -358,7 +359,7 @@ class AbsolutTradeAPI:
         response = self.session.get(
             f"{self.host}/Catalogs/Products/*/Description",
             headers=self.headers,
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
@@ -405,7 +406,7 @@ class AbsolutTradeAPI:
         response = self.session.get(
             f"{self.host}/Catalogs/MediaItems",
             headers=self.headers,
-            timeout=30,
+            timeout=self.timeout,
         )
         response.raise_for_status()
 
