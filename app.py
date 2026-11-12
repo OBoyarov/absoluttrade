@@ -1,6 +1,7 @@
 import os
 import json
 import logging
+from datetime import datetime
 from typing import Any, List, Dict, Optional
 
 import requests
@@ -13,10 +14,51 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s"
-)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+LOG_DIR = os.path.join(BASE_DIR, "logs")
+LOG_KEEP = 10
+
+
+def cleanup_old_logs() -> None:
+    """Keep only the LOG_KEEP most recent log files."""
+    try:
+        files = [f for f in os.listdir(LOG_DIR) if f.endswith(".log")]
+    except FileNotFoundError:
+        return
+
+    files.sort(
+        key=lambda f: (os.path.getmtime(os.path.join(LOG_DIR, f)), f),
+        reverse=True,
+    )
+
+    for old in files[LOG_KEEP:]:
+        try:
+            os.remove(os.path.join(LOG_DIR, old))
+        except OSError:
+            pass
+
+
+def setup_logging() -> None:
+    os.makedirs(LOG_DIR, exist_ok=True)
+
+    log_file = os.path.join(
+        LOG_DIR,
+        datetime.now().strftime("sync_%Y-%m-%d_%H-%M-%S.log"),
+    )
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [%(levelname)s] %(message)s",
+        handlers=[
+            logging.FileHandler(log_file, encoding="utf-8"),
+            logging.StreamHandler(),
+        ],
+    )
+
+    cleanup_old_logs()
+
+
+setup_logging()
 
 logger = logging.getLogger(__name__)
 
